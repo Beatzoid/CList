@@ -21,20 +21,36 @@ public class CListWaypointScreen extends Screen {
     public ScrollList list;
     @Override
     protected void init() {
-        GridWidget gridWidget = new GridWidget();
-        gridWidget.getMainPositioner().margin(4, 4, 4, 0);
-        GridWidget.Adder adder = gridWidget.createAdder(2);
-        adder.add(ButtonWidget.builder(Text.translatable("buttons.add.new.waypoint"), button -> {
-            PlayerEntity player = MinecraftClient.getInstance().player;
-            CListClient.addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()),false);
-            list.RefreshElements();
-        }).width(300).build(),2, gridWidget.copyPositioner().marginTop(10));
+        int buttonWidth = 300;
+
+        // Create a margin for all widgets
+        int margin = 4;
+
+        // Create a button at the specified position
+        ButtonWidget addButton = new ButtonWidget(
+                this.width / 2 - buttonWidth / 2, // x-coordinate
+                margin,                             // y-coordinate
+                buttonWidth,
+                20, // Assuming a height of 20, adjust as needed
+                Text.translatable("buttons.add.new.waypoint"),
+                button -> {
+                    PlayerEntity player = MinecraftClient.getInstance().player;
+                    CListClient.addNewWaypoint("X: " + Math.round(player.getX()) + " Y: " + Math.round(player.getY()) + " Z: " + Math.round(player.getZ()), false);
+                    list.RefreshElements();
+                }
+        );
+
+        // Set the position of the button
+        addButton.x = this.width / 2 - buttonWidth / 2;
+        addButton.y = margin;
+
+        // Create and initialize the ScrollList
         list = new ScrollList();
         list.SetupElements();
+
+        // Add the button and ScrollList to the screen
+        addDrawableChild(addButton);
         addDrawableChild(list);
-        gridWidget.recalculateDimensions();// 1.19.4 gridWidget.refreshPositions();
-        SimplePositioningWidget.setPos(gridWidget, 0, 0, this.width, this.height, 0.5f, 0f);
-        addDrawableChild(gridWidget);// 1.19.4 gridWidget.forEachChild(this::addDrawableChild);
     }
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -64,16 +80,33 @@ public class CListWaypointScreen extends Screen {
         public ScrollList(){
             super(CListWaypointScreen.this.client, CListWaypointScreen.this.width, CListWaypointScreen.this.height, 32, CListWaypointScreen.this.height - 32, 50);
         }
-        public void SetupElements(){
-            for(int i = 0; i < CListClient.variables.waypoints.size(); i++){
+        public void SetupElements() {
+            for (int i = 0; i < CListClient.variables.waypoints.size(); i++) {
                 final int f_i = i;
-                ScrollList.ScrollListEntry Coordinate = new ScrollList.ScrollListEntry(ButtonWidget.builder(Text.literal(CListClient.variables.waypoints.get(i).getCoordinates()), button -> {
-                    long window = MinecraftClient.getInstance().getWindow().getHandle();
-                    GLFW.glfwSetClipboardString(window, CListClient.variables.waypoints.get(f_i).getCoordinates());
-                }).width(150).build(),i,this);
-                list.addEntry(Coordinate);
+
+                // Create a button at the specified position
+                ButtonWidget coordinateButton = new ButtonWidget(
+                        0, // x-coordinate (will be set later during layout)
+                        0, // y-coordinate (will be set later during layout)
+                        150,
+                        20, // Assuming a height of 20, adjust as needed
+                        Text.literal(CListClient.variables.waypoints.get(i).getCoordinates()),
+                        button -> {
+                            long window = MinecraftClient.getInstance().getWindow().getHandle();
+                            GLFW.glfwSetClipboardString(window, CListClient.variables.waypoints.get(f_i).getCoordinates());
+                        }
+                );
+
+                // Set the position of the button
+                coordinateButton.x = this.width / 2 - coordinateButton.getWidth() / 2;
+                coordinateButton.y = i * 24 + 30; // Adjust the vertical spacing as needed
+
+                // Create a ScrollListEntry and add it to the ScrollList
+                ScrollList.ScrollListEntry coordinateEntry = new ScrollList.ScrollListEntry(coordinateButton, i, this);
+                list.addEntry(coordinateEntry);
             }
         }
+
         public void RefreshElements(){
             clearEntries();
             SetupElements();
@@ -96,27 +129,47 @@ public class CListWaypointScreen extends Screen {
             public final Text dimension;
             public final List<Element> children;
             public final int id;
+
             public ScrollListEntry(ButtonWidget e, int id, ScrollList list){
                 this.id = id;
                 this.button = e;
-                this.delete_button = ButtonWidget.builder(Text.translatable("buttons.delete.waypoint"), button -> {CListClient.deleteWaypoint(id);list.RefreshElements();}).width(70).build();
+
+                this.delete_button = new ButtonWidget(
+                        0, // x-coordinate (will be set later during layout)
+                        0, // y-coordinate (will be set later during layout)
+                        70,
+                        20, // Assuming a height of 20, adjust as needed
+                        Text.translatable("buttons.delete.waypoint"),
+                        button -> {
+                            CListClient.deleteWaypoint(id);
+                            list.RefreshElements();
+                        }
+                );
+
+                // Set the position of the button
+                this.delete_button.x =  120 - this.delete_button.getWidth() / 2;
+//                this.delete_button.y = /* set the y-coordinate based on your layout */;
+
+//                 Add the button to the screen
+//                this.children().add(delete_button);
+
                 this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 300, 20, Text.literal(""));
                 this.waypoint_name.setFocusUnlocked(true);
                 this.waypoint_name.setMaxLength(25);
                 this.waypoint_name.setText(CListClient.variables.waypoints.get(id).getName());
                 this.dimension = CListClient.variables.waypoints.get(id).getDimension();
                 this.children = Lists.newArrayList();
-                this.children.add(button);
-                this.children.add(delete_button);
-                this.children.add(waypoint_name);
+//                this.children.add(button);
+//                this.children.add(delete_button);
+//                this.children.add(waypoint_name);
             }
             @Override
             public void render(MatrixStack matrices, int index, int y, int x, int width, int height, int mouseX, int mouseY, boolean hovered, float delta) {
-                button.setX(x-10);
-                button.setY(y+4);
-                delete_button.setX(x+140);
-                delete_button.setY(y+4);
-                waypoint_name.setY(y+29);
+                button.x = x-10;
+                button.y = y+4;
+                delete_button.x = x+140;
+                delete_button.y = y+4;
+                waypoint_name.y = y+29;
                 waypoint_name.setX(x-8);
                 waypoint_name.setWidth(width-73);
                 button.render(matrices, mouseX, mouseY, delta);

@@ -17,10 +17,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 import org.apache.commons.lang3.StringUtils;
-import org.joml.Matrix4f;
+import net.minecraft.util.math.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -89,8 +89,8 @@ public class CListClient implements ClientModInitializer {
                         Vec3d targetPosition = new Vec3d(variables.waypoints.get(i).getX(), variables.waypoints.get(i).getY() + 1, variables.waypoints.get(i).getZ());
                         Vec3d transformedPosition = targetPosition.subtract(camera.getPos());
                         MatrixStack matrixStack = new MatrixStack();
-                        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-                        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
+                        matrixStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(camera.getPitch()));
+                        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(camera.getYaw() + 180.0F));
                         matrixStack.translate(transformedPosition.x, transformedPosition.y, transformedPosition.z);
                         matrixStack.multiply(camera.getRotation());
                         matrixStack.scale(size, size, size);
@@ -102,7 +102,8 @@ public class CListClient implements ClientModInitializer {
                         buffer.vertex(positionMatrix, 0, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(0f, 1f).next();
                         buffer.vertex(positionMatrix, 1, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 1).next();
                         buffer.vertex(positionMatrix, 1, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 0f).next();
-                        RenderSystem.setShader(GameRenderer::getPositionColorTexProgram);
+//                      RenderSystem.setShader(GameRenderer::getPositionColorTexProgram);
+                        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
                         if(variables.waypoints.get(i).getName().contains((Text.translatable("waypoint.death")).getString().toLowerCase())){
                             RenderSystem.setShaderTexture(0, new Identifier("coordinatelist", "skull.png"));
                         }
