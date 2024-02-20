@@ -1,6 +1,7 @@
 package one.pouekdev.coordinatelist;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import eu.midnightdust.lib.config.MidnightConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -22,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
-import eu.midnightdust.lib.config.MidnightConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -201,16 +201,24 @@ public class CListClient implements ClientModInitializer {
             }
             else{
                 if(!variables.is_world_error){
-                    try{
+                    try {
                         variables.last_world = client.world;
+
                         checkForWorldChanges(variables.last_world);
                         checkIfSaveIsNeeded(false);
+
                         if (client.isInSingleplayer()) {
                             variables.worldName = client.getServer().getSaveProperties().getLevelName();
                         } else {
-                            variables.worldName = client.getCurrentServerEntry().address;
-                            variables.worldName = variables.worldName.replace(":","P");
+                            if (client.getCurrentServerEntry().isRealm()) {
+                                // Realm ips change dynamically, the name can change too but it's better than the ip
+                               variables.worldName = client.getCurrentServerEntry().name.replace(" ", "_");
+                            } else {
+                                variables.worldName = client.getCurrentServerEntry().address;
+                                variables.worldName = variables.worldName.replace(":", "P");
+                            }
                         }
+
                         if(!client.player.isAlive() && !variables.had_death_waypoint_placed && CListConfig.can_place_deathpoints){
                             PlayerEntity player = client.player;
                             addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()),true);
