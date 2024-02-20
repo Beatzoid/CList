@@ -6,12 +6,13 @@
   "name": "CList",
   "description": "Coordinate List (CList for short) is a simple minimalistic fabric mod for saving your coordinates. No minimaps. Just a list with in-game waypoints.",
   "authors": [
+    "Beatzoid",
     "PouekDEV"
   ],
   "contact": {
-    "homepage": "https://modrinth.com/mod/clist",
-    "sources": "https://github.com/PouekDEV/CList",
-    "issues": "https://github.com/PouekDEV/CList/issues"
+    "homepage": "https://modrinth.com/mod/clist-v2",
+    "sources": "https://github.com/Beatzoid/CList",
+    "issues": "https://github.com/Beatzoid/CList/issues"
   },
 
   "license": "MIT License",
@@ -20,10 +21,10 @@
   "environment": "client",
   "entrypoints": {
     "main": [
-      "one.pouekdev.coordinatelist.CList"
+      "me.beatzoid.coordinatelist.CList"
     ],
     "client": [
-      "one.pouekdev.coordinatelist.CListClient"
+      "me.beatzoid.coordinatelist.CListClient"
     ]
   },
   "mixins": [

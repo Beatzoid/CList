@@ -1,4 +1,4 @@
-package one.pouekdev.coordinatelist;
+package me.beatzoid.coordinatelist;
 
 import eu.midnightdust.lib.config.MidnightConfig;
 import net.fabricmc.api.ModInitializer;
